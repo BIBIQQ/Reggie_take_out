@@ -12,4 +12,10 @@ import com.ff.entity.Employee;
 public interface EmployeeService  extends IService<Employee> {
     //  管理员登录
     Result login(Employee employee);
+    //  新增员工
+    Result addEmployee(Employee employee);
+    //  员工展示
+    Result findAllEmployeeByPage(int page, int pageSize, String name);
+    //  修改状态
+    Result updetaEmployee(Employee employee);
 }
