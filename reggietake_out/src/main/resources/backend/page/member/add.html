@@ -192,8 +192,6 @@
                     if (res.code === 1) {
                       this.$message.success('员工信息修改成功！')
                       this.goBack()
-                    } else {
-                      this.$message.error(res.msg || '操作失败')
                     }
                   }).catch(err => {
                     this.$message.error('请求出错了：' + err)

@@ -13,7 +13,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
  * @date 2021/11/22
  * @TIME:11:56
  */
-@ControllerAdvice
+//@ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
@@ -28,5 +28,23 @@ public class GlobalExceptionHandler {
     public Result doSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex){
 
         return  Result.error("用户已经存在");
+    }
+
+    @ExceptionHandler(SystemException.class)
+    @ResponseBody
+    public  Result doSystemException(SystemException ex){
+        return  Result.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    @ResponseBody
+    public  Result doBusinessException(BusinessException ex){
+        return  Result.error(ex.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseBody
+    public  Result doRuntimeException(RuntimeException ex){
+        return  Result.error("操作错误，请重新操作");
     }
 }

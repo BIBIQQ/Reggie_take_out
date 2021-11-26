@@ -77,21 +77,21 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeDao, Employee>  imp
             return  Result.error("添加失败，不能为空");
         }
         //判断注册的用户是否注册过
-      /*  LambdaQueryWrapper<Employee> emlqw = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<Employee> emlqw = new LambdaQueryWrapper<>();
         emlqw.eq(Employee::getUsername,employee.getUsername());
         Employee employeeByUserName = employeeDao.selectOne(emlqw);
         if(employeeByUserName != null){
             return Result.error("用户已经注册过，请重新输入！");
-        }*/
+        }
         //设置创建时间 和修改时间
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
+//        employee.setCreateTime(LocalDateTime.now());
+//        employee.setUpdateTime(LocalDateTime.now());
         //设置创建人 和   修改人
-        Long userId = (Long) request.getSession().getAttribute("userId");
-        employee.setCreateUser(userId);
-        employee.setUpdateUser(userId);
+//        Long userId = (Long) request.getSession().getAttribute("userId");
+//        employee.setCreateUser(userId);
+//        employee.setUpdateUser(userId);
         //设置密码为MD5格式
-        String password = DigestUtils.md5DigestAsHex("123456".getBytes());
+        String password = DigestUtils.md5DigestAsHex( "123456".getBytes());
         employee.setPassword(password);
 
         // 添加用户
@@ -129,6 +129,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeDao, Employee>  imp
      */
     @Override
     public Result updetaEmployee(Employee employee) {
+        //  管理员不允许进行修改
+        if(employee.getId() == 1){
+            return Result.error("不允许修改");
+        }
+
         //判断传输进来的id是否存在用户
         Employee emp = employeeDao.selectById(employee.getId());
         if(emp == null){
