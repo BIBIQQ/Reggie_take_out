@@ -62,4 +62,12 @@ public interface DishService  extends IService<Dish> {
      */
     @Transactional(rollbackFor = Exception.class)
     Result deleteById(Long[] ids);
+
+    /**
+     * 通过 分类id搜索  菜品内容
+     * @param categoryId
+     * @param status
+     * @return
+     */
+    Result findByCategroyId(Long categoryId, Integer status);
 }

@@ -91,4 +91,15 @@ public class DishController {
       Result result =  dishService.deleteById(ids);
         return result;
     }
+
+    /**
+     * 通过 分类id搜索  菜品内容
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/list")
+    private Result findByCategroyId(Long categoryId,Integer status){
+        Result result = dishService.findByCategroyId(categoryId,status);
+        return result;
+    }
 }

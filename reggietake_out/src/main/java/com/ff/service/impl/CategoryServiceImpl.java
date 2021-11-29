@@ -134,7 +134,7 @@ public class CategoryServiceImpl extends ServiceImpl<CatagoryDao, Category> impl
     @Override
     public Result listByType(Integer type) {
         LambdaQueryWrapper<Category> clqw = new LambdaQueryWrapper<>();
-        clqw.eq(Category::getType,type);
+        clqw.eq(type!=null, Category::getType,type);
 
         List<Category> categories = catagoryDao.selectList(clqw);
         if(categories == null){

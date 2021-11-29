@@ -70,6 +70,12 @@
 			<version>1.1.23</version>
 		</dependency>
 
+		<!--阿里云  短信  依赖-->
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>aliyun-java-sdk-core</artifactId>
+			<version>4.5.16</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
 		<!--<dependency>
 			<groupId>org.springframework.boot</groupId>
