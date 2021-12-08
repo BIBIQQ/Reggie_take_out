@@ -2,12 +2,14 @@ package com.ff.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ff.common.RedisKeys;
 import com.ff.common.Result;
 import com.ff.dao.UserDao;
 import com.ff.doto.LoginDto;
 import com.ff.entity.User;
 import com.ff.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +28,9 @@ public class UserServiceImpl  extends ServiceImpl<UserDao, User> implements User
     private UserDao userDao;
     @Autowired
     private HttpServletRequest request;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
     /**
      * 用户登录
      * @param loginDto
@@ -38,7 +43,9 @@ public class UserServiceImpl  extends ServiceImpl<UserDao, User> implements User
         String code = loginDto.getCode();
         // 取出域中的  验证码
         HttpSession session = request.getSession();
-        Integer Scode = (Integer) session.getAttribute(phone);
+//        Integer Scode = (Integer) session.getAttribute(phone);
+        // 取出缓存中的验证码
+        String Scode = (String) redisTemplate.opsForValue().get(RedisKeys.RG_CODE + phone);
         //  校验 域中的 验证码
         if(null == Scode ){
             return  Result.error("登录失败，请先发送验证码");
@@ -59,8 +66,8 @@ public class UserServiceImpl  extends ServiceImpl<UserDao, User> implements User
         }
         //登录成功后需要吧 用户id存储到域中
         session.setAttribute("user",user.getId());
-        //  去除域中的 验证码
-        session.removeAttribute(phone);
+        //  去除缓存中的 验证码
+        redisTemplate.delete(RedisKeys.RG_CODE + phone);
         return Result.success("登录成功");
     }
 }

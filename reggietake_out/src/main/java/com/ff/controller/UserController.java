@@ -1,6 +1,7 @@
 package com.ff.controller;
 
 import com.ff.common.BaseContext;
+import com.ff.common.RedisKeys;
 import com.ff.common.Result;
 import com.ff.doto.LoginDto;
 import com.ff.entity.User;
@@ -9,12 +10,14 @@ import com.ff.untils.CAPTCHA;
 import com.ff.untils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author FF
@@ -29,6 +32,8 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
     /**
      * 发送验证码
      * @param request
@@ -42,7 +47,9 @@ public class UserController {
         //发送给手机
 //        CAPTCHA.sendMsg(user.getPhone(),integer.toString());
         //  把验证码存储到 域中
-        request.getSession().setAttribute(user.getPhone(),integer);
+//        request.getSession().setAttribute(user.getPhone(),integer);
+        //  把 验证码存储到  缓存中、
+        redisTemplate.opsForValue().set(RedisKeys.RG_CODE+user.getPhone(),integer+"",5, TimeUnit.MINUTES);
         log.info("验证码{}",integer);
         return Result.success("发送成功");
     }

@@ -5,6 +5,9 @@ import com.ff.common.Result;
 import com.ff.doto.SetmealDto;
 import com.ff.service.SetmealService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -18,6 +21,9 @@ public class SetmealController {
 
     @Autowired
     private SetmealService setmealService;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     /**
      * 分页  多条件查询
@@ -38,6 +44,7 @@ public class SetmealController {
      * @param ids
      * @return
      */
+    @CacheEvict(value = "setmealCache",allEntries = true)
     @PostMapping("/status/{flag}")
     public Result updataStatusByIds(@PathVariable int flag, Long[] ids) {
         Result result = setmealService.updataStatusById(flag, ids);
@@ -60,6 +67,7 @@ public class SetmealController {
      * @param setmealDto
      * @return
      */
+    @CacheEvict(value = "setmealCache",key = "#setmealDto.categoryId+'_'+#setmealDto.status")
     @PostMapping
     public Result addSetmeal(@RequestBody SetmealDto setmealDto){
        Result result = setmealService.addSetmeal(setmealDto);
@@ -71,6 +79,7 @@ public class SetmealController {
      * @param setmealDto
      * @return
      */
+    @CacheEvict(value = "setmealCache",key = "#setmealDto.categoryId+'_'+#setmealDto.status")
     @PutMapping
     public Result editSetmeal(@RequestBody SetmealDto setmealDto){
        Result result = setmealService.editSetmeal(setmealDto);
@@ -82,6 +91,7 @@ public class SetmealController {
      * @param ids
      * @return
      */
+    @CacheEvict(value = "setmealCache",allEntries = true)
     @DeleteMapping
     public Result deleteSetmeal(Long[] ids){
        Result result = setmealService.deleteSetmeal(ids);
@@ -94,12 +104,13 @@ public class SetmealController {
      * @param status
      * @return
      */
+    @Cacheable(value = "setmealCache",key = "#categoryId+'_'+#status")
     @GetMapping("/list")
     public Result setmealList(Long categoryId,Integer status){
         Result result =  setmealService.setmealList(categoryId,status);
         return result;
     }
-
+    @Cacheable(value = "setmealCache",key = "#setmealId")
     @GetMapping("/dish/{setmealId}")
     public Result setmealDish(@PathVariable Long setmealId){
        Result result = setmealService.findSetmealDish(setmealId);

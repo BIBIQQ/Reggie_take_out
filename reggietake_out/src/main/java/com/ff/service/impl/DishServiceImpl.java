@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.ff.common.RedisKeys;
 import com.ff.common.Result;
 import com.ff.dao.DishDao;
 import com.ff.dao.DishFlavorDao;
@@ -20,6 +21,7 @@ import com.ff.service.SetmealDishService;
 import com.ff.service.SetmealService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,6 +53,9 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
 
     @Autowired
     private SetmealService setmealService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 动态 多条件 分页    查询
@@ -126,6 +131,8 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
             //修改  是否启用
             dishByid.setStatus(flag == 1 ? 1 : 0);
             dishDao.updateById(dishByid);
+            //清除 缓存
+//            redisTemplate.delete(RedisKeys.RG_DISH + dishByid.getCategoryId());
         }
 
         return Result.success("修改状态成功");
@@ -159,6 +166,8 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
             dishflavor.setDishId(dishId);
             dishFlavorDao.insert(dishflavor);
         });
+        //清除 缓存
+//        redisTemplate.delete(RedisKeys.RG_DISH + dish.getCategoryId());
         return Result.success("添加成功");
     }
 
@@ -222,7 +231,8 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
             dishflavor.setId(null);
             dishFlavorDao.insert(dishflavor);
         });
-
+        //清除 缓存
+        redisTemplate.delete(RedisKeys.RG_DISH + dishDto.getCategoryId());
         return Result.success("修改成功");
     }
 
@@ -245,6 +255,10 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
             if (list.size() > 0) {
                 return Result.error("套餐下还存在菜品，不允许删除");
             }
+            // 搜索菜品
+            Dish dish = dishDao.selectById(id);
+            //清除 缓存
+//            redisTemplate.delete(RedisKeys.RG_DISH + dish.getCategoryId());
             //删除  菜品
             dishDao.deleteById(id);
             // 删除  菜品口味
@@ -263,6 +277,12 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
      */
     @Override
     public Result findByCategroyId(Long categoryId, Integer status) {
+        // 从缓存中  获取 该类的  信息
+//        List<DishDto> dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(RedisKeys.RG_DISH + categoryId);
+        // 缓存中存在就  返回信息
+//        if (dishDtoList != null) {
+//            return Result.success(dishDtoList, "查询成功");
+//        }
 
         //搜索套餐是否存在
         Category byId = categoryService.getById(categoryId);
@@ -271,7 +291,7 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
         }
         // 搜索菜品
         LambdaQueryWrapper<Dish> dlqw = new LambdaQueryWrapper<>();
-        dlqw.eq(categoryId!= null,Dish::getCategoryId, categoryId).eq(status != null, Dish::getStatus, status);
+        dlqw.eq(categoryId != null, Dish::getCategoryId, categoryId).eq(status != null, Dish::getStatus, status);
         List<Dish> dishByCategroyId = dishDao.selectList(dlqw);
         //转换成 DishDto
         List<DishDto> dishDtoList = JSON.parseArray(JSON.toJSONString(dishByCategroyId), DishDto.class);
@@ -288,10 +308,13 @@ public class DishServiceImpl extends ServiceImpl<DishDao, Dish> implements DishS
             }
             //  获取分类名称
             Category categorybyId = categoryService.getById(dishDto.getCategoryId());
-            if(categorybyId!= null){
+            if (categorybyId != null) {
                 dishDto.setCategoryName(categorybyId.getName());
             }
         }
+        // 存储到 缓存中
+//        redisTemplate.opsForValue().set(RedisKeys.RG_DISH + categoryId,dishDtoList);
+
         // 反馈结果
         return Result.success(dishDtoList, "查询成功");
     }

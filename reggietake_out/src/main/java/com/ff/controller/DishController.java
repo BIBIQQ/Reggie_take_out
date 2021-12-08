@@ -5,6 +5,10 @@ import com.ff.doto.DishDto;
 import com.ff.entity.Dish;
 import com.ff.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -19,6 +23,9 @@ public class DishController {
 
     @Autowired
     private DishService dishService;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     /**
      * 动态 条件搜索  分页
@@ -40,6 +47,7 @@ public class DishController {
      * @param dishDto
      * @return
      */
+    @CacheEvict(value = "dishCache",key = "#dishDto.categoryId+'_'+#dishDto.status")
     @PostMapping
     public Result addDish(@RequestBody DishDto dishDto) {
         Result result = dishService.addDish(dishDto);
@@ -52,6 +60,8 @@ public class DishController {
      * @param ids
      * @return
      */
+
+    @CacheEvict(value =  "dishCache",allEntries = true)
     @PostMapping("/status/{flag}")
     public Result updataStatusByIds(@PathVariable int flag, Long[] ids) {
         Result result = dishService.updataStatusById(flag, ids);
@@ -75,6 +85,7 @@ public class DishController {
      * @param dishDto
      * @return
      */
+    @CacheEvict(value = "dishCache",key = "#dishDto.categoryId+'_'+#dishDto.status")
     @PutMapping
     public Result editDishById(@RequestBody DishDto dishDto) {
         Result result = dishService.editDishById(dishDto);
@@ -86,6 +97,7 @@ public class DishController {
      * @param ids
      * @return
      */
+    @CacheEvict(value =  "dishCache",allEntries = true)
     @DeleteMapping
     public Result deleteById(Long[] ids){
       Result result =  dishService.deleteById(ids);
@@ -97,8 +109,9 @@ public class DishController {
      * @param categoryId
      * @return
      */
+    @Cacheable(value = "dishCache",key = "#categoryId+'_'+#status")
     @GetMapping("/list")
-    private Result findByCategroyId(Long categoryId,Integer status){
+    public Result findByCategroyId(Long categoryId,Integer status){
         Result result = dishService.findByCategroyId(categoryId,status);
         return result;
     }

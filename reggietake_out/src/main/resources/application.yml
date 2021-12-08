@@ -8,12 +8,21 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://175.24.175.153:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
-      username: root
+      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: reggie
       password: root
   servlet:
     multipart:
       max-file-size: 2MB
+  redis:
+    host: localhost
+    password: fl1234  #redis 密码
+    port: 6379
+    database: 0
+    cache:
+      redis:
+        time-to-live: 1800    #过期时间
+
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
@@ -28,5 +37,5 @@ mybatis-plus:
       logic-delete-value: 1
       logic-delete-field: isDeleted
 reggie:
-  path: img\
+  path: /usr/local/img/
 
